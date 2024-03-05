@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Rules Library Json Extractor</title>
+<style>
+ body {
+  background-image: url('back.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: white;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 100px;
+  height: calc(100vh - 100px);
+}
+.title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: bold;
+  color: white;
+}
+.boxes {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+}
+.box {
+  border: 2px solid black;
+  background-color: white;
+  margin: 10px;
+  padding: 10px;
+  color: black;
+  width: 300px;
+  height: 400px;
+}
+ 
+.beuti-box {
+  background-color: #88b5e2;
+  color: black;
+  border: 2px solid black;
+  margin: 10px;
+  padding: 10px;
+  color: black;
+  width: 300px;
+  height: 400px;
+  overflow: auto;
+}
+.output-box {
+  background-color: #f3bda0;
+  color: black;
+  border: 2px solid black;
+  margin: 10px;
+  padding: 10px;
+  color: black;
+  width: 300px;
+  height: 400px;
+  overflow: auto;
+}
+ 
+.arrow-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  margin: 10px;
+}
+.arrow {
+  border: 1px solid white;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+}
+.clear-box {
+  width: 3cm;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: rgb(8, 2, 2);
+  height: 80px;
+  border: 2px solid black;
+  background-color: #fdf8f8;
+  margin: 10px 0;
+}
+.clear-box:hover {
+  background-color: #f1efef;
+}
+textarea {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: white;
+  color: #000003;
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">Rules Library Json Extractor</div>
+        <div class="boxes">
+          <textarea id="inputBox" class="box" placeholder="Paste your JSON text here"></textarea>
+          <div class="arrow-box" onclick="processJson()">
+            <div class="arrow">&#8594;</div>
+          </div>
+                     
+          <textarea id="beutiBox" class="beuti-box" readonly></textarea>
+          <div id="outputBox" class="output-box"></div>
+        </div>
+        <div class="clear-box" onclick="clearContent()">Clear</div>
+    </div>
+    <script>
+      function processJson() {
+          var inputText = document.getElementById('inputBox').value;
+          try {
+              var jsonObj = JSON.parse(inputText);
+              var prettyJson = JSON.stringify(jsonObj, null, 2);
+              document.getElementById('beutiBox').value = prettyJson;
+          } catch (e) {
+              document.getElementById('beutiBox').value = 'Invalid JSON: ' + e.message;
+              document.getElementById('outputBox').innerText = '';
+              return;
+          }
+         
+          searchJson(prettyJson);
+      }
+      function clearContent() {
+          document.getElementById('inputBox').value = '';
+          document.getElementById('beutiBox').value = '';
+          document.getElementById('outputBox').innerText = '';
+      }
+     
+      function searchJson(prettyJsonText) {
+          try {
+              var jsonObj = JSON.parse(prettyJsonText);
+              var searchPatterns = {
+                 'resourceType': '"eventCoding":\\s*{\\s*"system":\\s*"[^"]*",\\s*"code":\\s*"([^"]+)"',
+                  'Bundle ID': '"Bundle"[\\s\\S]*?"id":\\s*"([^"]+)"',
+                  'Claim Type': '/CodeSystem/claim-type"[\\s\\S]*?"code":\\s*"([^"]+)"',
+                  'Claim Sub-type': '/CodeSystem/claim-subtype"[\\s\\S]*?"code":\\s*"([^"]+)"',
+                  'Member ID': '/memberid"[\\s\\S]*?"value":\\s*"([^"]+)"',
+                  'National or Iqama ID': '(?:nphies\\.sa/identifier/nationalid|sa/identifier/iqama)"[\\s\\S]*?"value":\\s*"([\\d]+)"',
+                  //'National ID': 'nphies.sa/identifier/nationalid"[\\s\\S]*?"value":\\s*"([^"]+)"',
+                  //'Iqama ID': 'sa/identifier/iqama"[\\s\\S]*?"value":\\s*"([^"]+)"',
+                  'Organization ID': '.sa/license/provider-license"[\\s\\S]*?"value":\\s*"([^"]+)"',
+                  'Outcome': '"outcome":\\s*"([^"]+)"',
+                  'Disposition': '"disposition":\\s*"([^"]+)"',
+              };
+              var results = '';
+              for (var key in searchPatterns) {
+                  var regex = new RegExp(searchPatterns[key], 'i');
+                  var match = prettyJsonText.match(regex);
+                  results += key + ': ' + (match ? match[1] : 'Not found') + '\n';
+              }
+              var resourceType = '"eventCoding":\\s*{\\s*"system":\\s*"[^"]*",\\s*"code":\\s*"([^"]+)"';
+              var status = '"outcome":\\s*"([^"]+)"';
+              var Disposition = '"disposition":\\s*"([^"]+)"';
+              var servicePattern = '"productOrService":\\s*{\\s*"coding":\\s*\\[\\s*{[\\s\\S]+?\\}\\s*,\\s*\\{[\\s\\S]+?\\}\\s*\\]\\s*},[\\s\\S]+?"quantity":\\s*{[\\s\\S]+?},[\\s\\S]+?"unitPrice":\\s*{[\\s\\S]+?}';
+              var displayPattern = '"display":\\s*"([^"]+)"';
+              var NphiesPattern = '"coding":\\s*\\[\\s*{[\\s\\S]+?"system":\\s*"([^"]+)",\\s*"code":\\s*"([^"]+)"';
+              var ServicePattern = '"coding":\\s*\\[\\s*{[\\s\\S]+?},\\s*{[\\s\\S]+?"system":\\s*"([^"]+)",\\s*"code":\\s*"([^"]+)"';
+              var quantityPattern = '"quantity":\\s*{\\s*"value":\\s*(\\d+)';
+              var pricePattern = '"unitPrice":\\s*{\\s*"value":\\s*(\\d+(\\.\\d+)?)';
+              var serviceResults = '';
+              var serviceMatches = prettyJsonText.match(new RegExp(servicePattern, 'gi'));
+              if (serviceMatches) {
+                  for (var i = 0; i < serviceMatches.length; i++) {
+                     
+                      var currentMatch = serviceMatches[i];
+                      var displayMatch = currentMatch.match(new RegExp(displayPattern, 'i'));
+                      var NphiesMatch = currentMatch.match(new RegExp(NphiesPattern, 'i'));
+                      var ServiceMatch = currentMatch.match(new RegExp(ServicePattern, 'i'));
+                      var quantityMatch = currentMatch.match(new RegExp(quantityPattern, 'i'));
+                      var priceMatch = currentMatch.match(new RegExp(pricePattern, 'i'));
+ 
+                      serviceResults += 'Product/Service ' + (i + 1) + ': \n';
+                      serviceResults += 'Name: ' + (displayMatch ? displayMatch[1] : 'Not found') + '\n';
+                      serviceResults += 'Nphies Code: ' + (NphiesMatch ? NphiesMatch[2] : 'Not found') + '\n';
+                      serviceResults += 'Service Code: ' + (ServiceMatch ? ServiceMatch[2] : 'Not found') + '\n';
+                      serviceResults += 'Quantity: ' + (quantityMatch ? quantityMatch[1] : 'Not found') + '\n';
+                      serviceResults += 'Price: ' + (priceMatch ? priceMatch[1] : 'Not found') + ' SAR\n\n';
+                  }
+              }
+     
+              document.getElementById('outputBox').innerText = results + '\n' + serviceResults;
+          } catch (e) {
+              document.getElementById('outputBox').innerText = 'Error searching JSON: ' + e.message;
+          }
+      }
+    </script>
+  </body>
+      </html>
