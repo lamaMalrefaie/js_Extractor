@@ -44,7 +44,7 @@
   padding: 10px;
   color: black;
   width: 300px;
-  height: 400px;
+  height: 600px;
 }
  
 .beuti-box {
@@ -54,20 +54,21 @@
   margin: 10px;
   padding: 10px;
   color: black;
-  width: 300px;
-  height: 400px;
+  width: 600px;
+  height: 700px;
   overflow: auto;
 }
 .output-box {
-  background-color: #f3bda0;
-  color: black;
-  border: 2px solid black;
+  background-color: #020100;
+  color: #8fbc8f;
+  border: 2px solid #000000;
   margin: 10px;
   padding: 10px;
-  color: black;
-  width: 300px;
-  height: 400px;
+  color: #8fbc8f;
+  width: 600px;
+  height: 700px;
   overflow: auto;
+  font-weight: bold;
 }
  
 .arrow-box {
@@ -118,7 +119,7 @@ textarea {
             <div class="arrow-box" onclick="processJson()">
                 <div class="arrow">&#8594;</div>
             </div>
-            
+           
             <textarea id="beutiBox" class="beuti-box" readonly></textarea>
             <div id="outputBox" class="output-box"></div>
         </div>
@@ -136,16 +137,16 @@ textarea {
                 document.getElementById('outputBox').innerText = '';
                 return;
             }
-            
+           
             searchJson(prettyJson);
         }
-
+ 
         function clearContent() {
             document.getElementById('inputBox').value = '';
             document.getElementById('beutiBox').value = '';
             document.getElementById('outputBox').innerText = '';
         }
-
+ 
         function searchJson(prettyJsonText) {
             try {
                 var jsonObj = JSON.parse(prettyJsonText);
@@ -156,9 +157,12 @@ textarea {
                     'Claim Sub-type': '/CodeSystem/claim-subtype"[\\s\\S]*?"code":\\s*"([^"]+)"',
                     'Member ID': '/memberid"[\\s\\S]*?"value":\\s*"([^"]+)"',
                     'National or Iqama ID': '(?:nphies\\.sa/identifier/nationalid|sa/identifier/iqama)"[\\s\\S]*?"value":\\s*"([\\d]+)"',
-                    'Organization ID': '.sa/license/provider-license"[\\s\\S]*?"value":\\s*"([^"]+)"',
+                    'Organization ID': '.sa/license/provider-license"[\\s\\S]*?"value":\\s*"([^"]+)"'
+                };
+                
+                var optionalPatterns = {
                     'Outcome': '"outcome":\\s*"([^"]+)"',
-                    'Disposition': '"disposition":\\s*"([^"]+)"',
+                    'Disposition': '"disposition":\\s*"([^"]+)"'
                 };
                 
                 var results = '';
@@ -166,6 +170,14 @@ textarea {
                     var regex = new RegExp(searchPatterns[key], 'i');
                     var match = prettyJsonText.match(regex);
                     results += key + ': ' + (match ? match[1] : 'Not found') + '\n';
+                }
+                
+                for (var key in optionalPatterns) {
+                    var regex = new RegExp(optionalPatterns[key], 'i');
+                    var match = prettyJsonText.match(regex);
+                    if (match) { // Only append if found
+                        results += key + ': ' + match[1] + '\n';
+                    }
                 }
                 
                 processProductOrService(prettyJsonText, results);
@@ -176,7 +188,6 @@ textarea {
 
         function processProductOrService(prettyJsonText, previousResults) {
             var servicePattern = '"productOrService":\\s*{[\\s\\S]+?},[\\s\\S]*?"quantity":\\s*{\\s*"value":\\s*(\\d+)';
-            var pricePattern = '"unitPrice":\\s*{\\s*"value":\\s*(\\d+(\\.\\d+)?)';
 
             var serviceResults = '';
             var serviceMatches = prettyJsonText.match(new RegExp(servicePattern, 'gi'));
@@ -191,14 +202,12 @@ textarea {
                     var NphiesMatch = currentMatch.match(new RegExp(NphiesPattern, 'i'));
                     var ServiceMatch = currentMatch.match(new RegExp(ServicePattern, 'i'));
                     var quantityMatch = currentMatch.match(new RegExp('"quantity":\\s*{\\s*"value":\\s*(\\d+)', 'i'));
-                    var priceMatch = currentMatch.match(new RegExp(pricePattern, 'i'));
 
                     serviceResults += 'Product/Service ' + (i + 1) + ': \n';
                     serviceResults += 'Name: ' + (displayMatch ? displayMatch[1] : 'Not found') + '\n';
                     serviceResults += 'Nphies Code: ' + (NphiesMatch ? NphiesMatch[2] : 'Not found') + '\n';
                     serviceResults += 'Service Code: ' + (ServiceMatch ? ServiceMatch[2] : 'Not found') + '\n';
-                    serviceResults += 'Quantity: ' + (quantityMatch ? quantityMatch[1] : 'Not found') + '\n';
-                    serviceResults += 'Price: ' + (priceMatch ? priceMatch[1] : 'Not found') + ' SAR\n\n';
+                    serviceResults += 'Quantity: ' + (quantityMatch ? quantityMatch[1] : 'Not found') + '\n\n\n';
                 }
             }
 
