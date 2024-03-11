@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Rules Library Json Extractor</title>
+  <title>Rules Library Json Extractor</title>
 
-    <style>
+  <style>
  body {
   background-image: url('back.png');
   background-size: cover;
@@ -112,7 +112,7 @@ textarea {
 </style>
 </head>
 <body>
-    <div class="container">
+  <div class="container">
         <div class="title">Rules Library Json Extractor</div>
         <div class="boxes">
             <textarea id="inputBox" class="box" placeholder="Paste your JSON text here"></textarea>
@@ -124,7 +124,7 @@ textarea {
             <div id="outputBox" class="output-box"></div>
         </div>
         <div class="clear-box" onclick="clearContent()">Clear</div>
-    </div>
+  </div>
     <script>
         function processJson() {
             var inputText = document.getElementById('inputBox').value;
@@ -152,7 +152,7 @@ textarea {
         var jsonObj = JSON.parse(prettyJsonText);
         var searchPatterns = {
             'resourceType': '"eventCoding":\\s*{\\s*"system":\\s*"[^"]*",\\s*"code":\\s*"([^"]+)"'+"\n",
-            'Bundle ID': '"Bundle"[\\s\\S]*?"id":\\s*"([^"]+)"'+"\n",
+            'Bundle ID': '"Bundle"[\\s\\S]*?"id":\\s*"([^"]+)"',
             'Claim Type': '/CodeSystem/claim-type"[\\s\\S]*?"code":\\s*"([^"]+)"'+"\n",
             'Claim Sub-type': '/CodeSystem/claim-subtype"[\\s\\S]*?"code":\\s*"([^"]+)"'+"\n",
             'Member ID': '/memberid"[\\s\\S]*?"value":\\s*"([^"]+)"'+"\n",
@@ -170,9 +170,8 @@ textarea {
         for (var key in searchPatterns) {
             var regex = new RegExp(searchPatterns[key], 'i');
             var match = prettyJsonText.match(regex);
-            if (match) { // If match found
+            if (match) { 
                 if (key === 'Member ID' || key === 'National or Iqama ID' || key === 'Organization ID') {
-                    // Add copy feature for these fields
                     results += key + ': ' + copyButton(match[1]) + '<br>';
                 } else {
                     results += key + ': ' + (match ? match[1] : 'Not found') + '<br>';
@@ -185,7 +184,7 @@ textarea {
         for (var key in optionalPatterns) {
             var regex = new RegExp(optionalPatterns[key], 'i');
             var match = prettyJsonText.match(regex);
-            if (match) { // Only append if found
+            if (match) { 
                 results += key + ': ' + match[1] + '<br>';
             }
         }
@@ -217,7 +216,6 @@ function processProductOrService(prettyJsonText, previousResults) {
             serviceResults += 'Name: ' + (displayMatch ? displayMatch[1] : 'Not found') + '<br>';
             serviceResults += 'Nphies Code: ' + (NphiesMatch ? copyButton(NphiesMatch[2]) : 'Not found') + '<br>';
             serviceResults += 'Service Code: ' + (ServiceMatch ? copyButton(ServiceMatch[2]) : 'Not found') + '<br>';
-            // Removed copy feature from Quantity
             serviceResults += 'Quantity: ' + (quantityMatch ? quantityMatch[1] : 'Not found') + '<br><br>';
         }
     }
@@ -226,7 +224,7 @@ function processProductOrService(prettyJsonText, previousResults) {
 }
 
 function copyButton(text) {
-    return text + ' <button onclick="copyToClipboard(\'' + text + '\')">Copy</button>';
+    return '<span style="cursor: pointer; text-decoration: underline;" onclick="copyToClipboard(\'' + text + '\')">' + text + '</span>';
 }
 
 function copyToClipboard(text) {
@@ -236,7 +234,7 @@ function copyToClipboard(text) {
     dummy.select();
     document.execCommand("copy");
     document.body.removeChild(dummy);
-}
+    alert('Copied: ' + text); 
 
 </script>
 </body>
