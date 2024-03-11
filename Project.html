@@ -148,71 +148,96 @@ textarea {
         }
  
         function searchJson(prettyJsonText) {
-            try {
-                var jsonObj = JSON.parse(prettyJsonText);
-                var searchPatterns = {
-                    'resourceType': '"eventCoding":\\s*{\\s*"system":\\s*"[^"]*",\\s*"code":\\s*"([^"]+)"',
-                    'Bundle ID': '"Bundle"[\\s\\S]*?"id":\\s*"([^"]+)"',
-                    'Claim Type': '/CodeSystem/claim-type"[\\s\\S]*?"code":\\s*"([^"]+)"',
-                    'Claim Sub-type': '/CodeSystem/claim-subtype"[\\s\\S]*?"code":\\s*"([^"]+)"',
-                    'Member ID': '/memberid"[\\s\\S]*?"value":\\s*"([^"]+)"',
-                    'National or Iqama ID': '(?:nphies\\.sa/identifier/nationalid|sa/identifier/iqama)"[\\s\\S]*?"value":\\s*"([\\d]+)"',
-                    'Organization ID': '.sa/license/provider-license"[\\s\\S]*?"value":\\s*"([^"]+)"'
-                };
-                
-                var optionalPatterns = {
-                    'Outcome': '"outcome":\\s*"([^"]+)"',
-                    'Disposition': '"disposition":\\s*"([^"]+)"'
-                };
-                
-                var results = '';
-                for (var key in searchPatterns) {
-                    var regex = new RegExp(searchPatterns[key], 'i');
-                    var match = prettyJsonText.match(regex);
-                    results += key + ': ' + (match ? match[1] : 'Not found') + '\n';
+    try {
+        var jsonObj = JSON.parse(prettyJsonText);
+        var searchPatterns = {
+            'resourceType': '"eventCoding":\\s*{\\s*"system":\\s*"[^"]*",\\s*"code":\\s*"([^"]+)"'+"\n",
+            'Bundle ID': '"Bundle"[\\s\\S]*?"id":\\s*"([^"]+)"'+"\n",
+            'Claim Type': '/CodeSystem/claim-type"[\\s\\S]*?"code":\\s*"([^"]+)"'+"\n",
+            'Claim Sub-type': '/CodeSystem/claim-subtype"[\\s\\S]*?"code":\\s*"([^"]+)"'+"\n",
+            'Member ID': '/memberid"[\\s\\S]*?"value":\\s*"([^"]+)"'+"\n",
+            'National or Iqama ID': '(?:nphies\\.sa/identifier/nationalid|sa/identifier/iqama)"[\\s\\S]*?"value":\\s*"([\\d]+)"'+"\n",
+            'Organization ID': '.sa/license/provider-license"[\\s\\S]*?"value":\\s*"([^"]+)"'+"\n",
+            'Gender': '"gender":\\s*"([^"]+)"'
+        };
+        
+        var optionalPatterns = {
+            'Outcome': '"outcome":\\s*"([^"]+)"',
+            'Disposition': '"disposition":\\s*"([^"]+)"'
+        };
+        
+        var results = '';
+        for (var key in searchPatterns) {
+            var regex = new RegExp(searchPatterns[key], 'i');
+            var match = prettyJsonText.match(regex);
+            if (match) { // If match found
+                if (key === 'Member ID' || key === 'National or Iqama ID' || key === 'Organization ID') {
+                    // Add copy feature for these fields
+                    results += key + ': ' + copyButton(match[1]) + '<br>';
+                } else {
+                    results += key + ': ' + (match ? match[1] : 'Not found') + '<br>';
                 }
-                
-                for (var key in optionalPatterns) {
-                    var regex = new RegExp(optionalPatterns[key], 'i');
-                    var match = prettyJsonText.match(regex);
-                    if (match) { // Only append if found
-                        results += key + ': ' + match[1] + '\n';
-                    }
-                }
-                
-                processProductOrService(prettyJsonText, results);
-            } catch (e) {
-                document.getElementById('outputBox').innerText = 'Error searching JSON: ' + e.message;
+            } else {
+                results += key + ': Not found<br>';
             }
         }
-
-        function processProductOrService(prettyJsonText, previousResults) {
-            var servicePattern = '"productOrService":\\s*{[\\s\\S]+?},[\\s\\S]*?"quantity":\\s*{\\s*"value":\\s*(\\d+)';
-
-            var serviceResults = '';
-            var serviceMatches = prettyJsonText.match(new RegExp(servicePattern, 'gi'));
-
-            if (serviceMatches) {
-                for (var i = 0; i < serviceMatches.length; i++) {
-                    var currentMatch = serviceMatches[i];
-                    var displayPattern = '"display":\\s*"([^"]+)"';
-                    var NphiesPattern = '"coding":\\s*\\[\\s*{[\\s\\S]+?"system":\\s*"([^"]+)",\\s*"code":\\s*"([^"]+)"';
-                    var ServicePattern = '"coding":\\s*\\[\\s*{[\\s\\S]+?},\\s*{[\\s\\S]+?"system":\\s*"([^"]+)",\\s*"code":\\s*"([^"]+)"';
-                    var displayMatch = currentMatch.match(new RegExp(displayPattern, 'i'));
-                    var NphiesMatch = currentMatch.match(new RegExp(NphiesPattern, 'i'));
-                    var ServiceMatch = currentMatch.match(new RegExp(ServicePattern, 'i'));
-                    var quantityMatch = currentMatch.match(new RegExp('"quantity":\\s*{\\s*"value":\\s*(\\d+)', 'i'));
-
-                    serviceResults += 'Product/Service ' + (i + 1) + ': \n';
-                    serviceResults += 'Name: ' + (displayMatch ? displayMatch[1] : 'Not found') + '\n';
-                    serviceResults += 'Nphies Code: ' + (NphiesMatch ? NphiesMatch[2] : 'Not found') + '\n';
-                    serviceResults += 'Service Code: ' + (ServiceMatch ? ServiceMatch[2] : 'Not found') + '\n';
-                    serviceResults += 'Quantity: ' + (quantityMatch ? quantityMatch[1] : 'Not found') + '\n\n\n';
-                }
+        
+        for (var key in optionalPatterns) {
+            var regex = new RegExp(optionalPatterns[key], 'i');
+            var match = prettyJsonText.match(regex);
+            if (match) { // Only append if found
+                results += key + ': ' + match[1] + '<br>';
             }
-
-            document.getElementById('outputBox').innerText = previousResults + '\n' + serviceResults;
         }
-    </script>
+        
+        processProductOrService(prettyJsonText, results);
+    } catch (e) {
+        document.getElementById('outputBox').innerText = 'Error searching JSON: ' + e.message;
+    }
+}
+
+function processProductOrService(prettyJsonText, previousResults) {
+    var servicePattern = '"productOrService":\\s*{[\\s\\S]+?},[\\s\\S]*?"quantity":\\s*{\\s*"value":\\s*(\\d+)';
+
+    var serviceResults = '';
+    var serviceMatches = prettyJsonText.match(new RegExp(servicePattern, 'gi'));
+
+    if (serviceMatches) {
+        for (var i = 0; i < serviceMatches.length; i++) {
+            var currentMatch = serviceMatches[i];
+            var displayPattern = '"display":\\s*"([^"]+)"';
+            var NphiesPattern = '"coding":\\s*\\[\\s*{[\\s\\S]+?"system":\\s*"([^"]+)",\\s*"code":\\s*"([^"]+)"';
+            var ServicePattern = '"coding":\\s*\\[\\s*{[\\s\\S]+?},\\s*{[\\s\\S]+?"system":\\s*"([^"]+)",\\s*"code":\\s*"([^"]+)"';
+            var displayMatch = currentMatch.match(new RegExp(displayPattern, 'i'));
+            var NphiesMatch = currentMatch.match(new RegExp(NphiesPattern, 'i'));
+            var ServiceMatch = currentMatch.match(new RegExp(ServicePattern, 'i'));
+            var quantityMatch = currentMatch.match(new RegExp('"quantity":\\s*{\\s*"value":\\s*(\\d+)', 'i'));
+
+            serviceResults += 'Product/Service ' + (i + 1) + ': <br>';
+            serviceResults += 'Name: ' + (displayMatch ? displayMatch[1] : 'Not found') + '<br>';
+            serviceResults += 'Nphies Code: ' + (NphiesMatch ? copyButton(NphiesMatch[2]) : 'Not found') + '<br>';
+            serviceResults += 'Service Code: ' + (ServiceMatch ? copyButton(ServiceMatch[2]) : 'Not found') + '<br>';
+            // Removed copy feature from Quantity
+            serviceResults += 'Quantity: ' + (quantityMatch ? quantityMatch[1] : 'Not found') + '<br><br>';
+        }
+    }
+
+    document.getElementById('outputBox').innerHTML = previousResults + serviceResults;
+}
+
+function copyButton(text) {
+    return text + ' <button onclick="copyToClipboard(\'' + text + '\')">Copy</button>';
+}
+
+function copyToClipboard(text) {
+    var dummy = document.createElement("textarea");
+    document.body.appendChild(dummy);
+    dummy.value = text;
+    dummy.select();
+    document.execCommand("copy");
+    document.body.removeChild(dummy);
+}
+
+</script>
 </body>
 </html>
