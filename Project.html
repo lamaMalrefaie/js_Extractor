@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Rules Library Json Extractor</title>
+    <title>Rules Library Json Extractor</title>
 
-  <style>
+    <style>
  body {
   background-image: url('back.png');
   background-size: cover;
@@ -112,7 +112,7 @@ textarea {
 </style>
 </head>
 <body>
-  <div class="container">
+    <div class="container">
         <div class="title">Rules Library Json Extractor</div>
         <div class="boxes">
             <textarea id="inputBox" class="box" placeholder="Paste your JSON text here"></textarea>
@@ -124,7 +124,7 @@ textarea {
             <div id="outputBox" class="output-box"></div>
         </div>
         <div class="clear-box" onclick="clearContent()">Clear</div>
-  </div>
+    </div>
     <script>
         function processJson() {
             var inputText = document.getElementById('inputBox').value;
@@ -172,6 +172,7 @@ textarea {
             var match = prettyJsonText.match(regex);
             if (match) { 
                 if (key === 'Member ID' || key === 'National or Iqama ID' || key === 'Organization ID') {
+                    
                     results += key + ': ' + copyButton(match[1]) + '<br>';
                 } else {
                     results += key + ': ' + (match ? match[1] : 'Not found') + '<br>';
@@ -191,7 +192,7 @@ textarea {
         
         processProductOrService(prettyJsonText, results);
     } catch (e) {
-        document.getElementById('outputBox').innerText = 'Error searching JSON: ' + e.message;
+        document.getElementById('outputBox').innerText = 'Error JSON File: ' + e.message;
     }
 }
 
@@ -235,6 +236,7 @@ function copyToClipboard(text) {
     document.execCommand("copy");
     document.body.removeChild(dummy);
     alert('Copied: ' + text); 
+}
 
 </script>
 </body>
