@@ -10,7 +10,7 @@
   background-repeat: no-repeat;
   background-attachment: fixed;
   color: white;
-  font-family: Arial, sans-serif;
+  font-family: Arial, sans-serif; 
   margin: 0;
   padding: 0;
 }
@@ -161,26 +161,77 @@ textarea {
             'Gender': '"gender":\\s*"([^"]+)"'
         };
         
+        var results = '';
+                var errorMessages = [];
+                for (var key in searchPatterns) {
+                    var regex = new RegExp(searchPatterns[key], 'i');
+                    var match = prettyJsonText.match(regex);
+                    var value = match && match[1];
+                    if (value) {
+                        // Apply specific validation for Member ID and National or Iqama ID
+                        if (key === 'Member ID' && !/^\d{8}$/.test(value)) {
+                            errorMessages.push('Error: Member ID should be exactly 8 digits.');
+                        } else if (key === 'National or Iqama ID' && !/^\d{10}$/.test(value)) {
+                            errorMessages.push('Error: National or Iqama ID should be exactly 10 digits.');
+                        } else {
+                            results += key + ': ' + copyButton(value) + '<br>';
+                        }
+                    } else {
+                        results += key + ': Not found<br>';
+                    }
+                }
+                var licensePattern = '"system":\\s*"http://nphies.sa/license/payer-license",\\s*"value":\\s*"([^"]+)"';
+                var licenseMatch = prettyJsonText.match(new RegExp(licensePattern, 'i'));
+                if (licenseMatch && licenseMatch[1] !== '7001571327') {
+                    errorMessages.push('it is not bupa License');
+                }
+
+                // Show error messages if there are any
+                if (errorMessages.length > 0) {
+                    alert(errorMessages.join('\n'));
+                }
+                
+                document.getElementById('outputBox').innerHTML = results;
+                processProductOrService(prettyJsonText, results);
+
+            } catch (e) {
+                document.getElementById('outputBox').innerText = 'Error parsing JSON: ' + e.message;
+            }
         var optionalPatterns = {
             'Outcome': '"outcome":\\s*"([^"]+)"',
             'Disposition': '"disposition":\\s*"([^"]+)"'
         };
         
         var results = '';
+        
         for (var key in searchPatterns) {
-            var regex = new RegExp(searchPatterns[key], 'i');
-            var match = prettyJsonText.match(regex);
-            if (match) { 
-                if (key === 'Member ID' || key === 'National or Iqama ID' || key === 'Organization ID') {
-                    
-                    results += key + ': ' + copyButton(match[1]) + '<br>';
+                var regex = new RegExp(searchPatterns[key], 'i');
+                var match = prettyJsonText.match(regex);
+                if (match) {
+                    var valid = true; 
+                    var message = '';
+                    if (key === 'Member ID') {
+                        if (match[1].length !== 8) {
+                            valid = false;
+                            message = 'Member ID should be exactly 8 digits.';
+                        }
+                    } else if (key === 'National or Iqama ID') {
+                        if (match[1].length !== 10) { // Check if National or Iqama ID is not 10 digits
+                            valid = false;
+                            message = 'National or Iqama ID should be exactly 10 digits.';
+                        }
+                    }
+
+                    if (valid) {
+                        results += key + ': ' + copyButton(match[1]) + '<br>';
+                    } else {
+                        results += key + ': ' + message + '<br>';
+                    }
                 } else {
-                    results += key + ': ' + (match ? match[1] : 'Not found') + '<br>';
+                    results += key + ': Not found<br>';
                 }
-            } else {
-                results += key + ': Not found<br>';
-            }
         }
+//
         
         for (var key in optionalPatterns) {
             var regex = new RegExp(optionalPatterns[key], 'i');
@@ -191,10 +242,7 @@ textarea {
         }
         
         processProductOrService(prettyJsonText, results);
-    } catch (e) {
-        document.getElementById('outputBox').innerText = 'Error JSON File: ' + e.message;
-    }
-}
+    } 
 
 function processProductOrService(prettyJsonText, previousResults) {
     var servicePattern = '"productOrService":\\s*{[\\s\\S]+?},[\\s\\S]*?"quantity":\\s*{\\s*"value":\\s*(\\d+)';
