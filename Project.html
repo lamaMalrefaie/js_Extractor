@@ -4,112 +4,112 @@
     <title>Rules Library Json Extractor</title>
 
     <style>
- body {
-  background-image: url('back.png');
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  color: white;
-  font-family: Arial, sans-serif; 
-  margin: 0;
-  padding: 0;
-}
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding-top: 100px;
-  height: calc(100vh - 100px);
-}
-.title {
-  font-size: 24px;
-  margin-bottom: 20px;
-  text-align: center;
-  font-weight: bold;
-  color: white;
-}
-.boxes {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  max-width: 100%;
-}
-.box {
-  border: 2px solid black;
-  background-color: white;
-  margin: 10px;
-  padding: 10px;
-  color: black;
-  width: 300px;
-  height: 600px;
-}
- 
-.beuti-box {
-  background-color: #88b5e2;
-  color: black;
-  border: 2px solid black;
-  margin: 10px;
-  padding: 10px;
-  color: black;
-  width: 600px;
-  height: 700px;
-  overflow: auto;
-}
-.output-box {
-  background-color: #020100;
-  color: #8fbc8f;
-  border: 2px solid #000000;
-  margin: 10px;
-  padding: 10px;
-  color: #8fbc8f;
-  width: 600px;
-  height: 700px;
-  overflow: auto;
-  font-weight: bold;
-}
- 
-.arrow-box {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  margin: 10px;
-}
-.arrow {
-  border: 1px solid white;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 24px;
-}
-.clear-box {
-  width: 3cm;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  color: rgb(8, 2, 2);
-  height: 80px;
-  border: 2px solid black;
-  background-color: #fdf8f8;
-  margin: 10px 0;
-}
-.clear-box:hover {
-  background-color: #f1efef;
-}
-textarea {
-  width: 100%;
-  height: 100%;
-  border: none;
-  background-color: white;
-  color: #000003;
-}
-</style>
+        body {
+        background-image: url('back.png');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        color: white;
+        font-family: Arial, sans-serif; 
+        margin: 0;
+        padding: 0;
+        }
+        .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding-top: 100px;
+        height: calc(100vh - 100px);
+        }
+        .title {
+        font-size: 24px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: bold;
+        color: white;
+        }
+        .boxes {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        max-width: 100%;
+        }
+        .box {
+        border: 2px solid black;
+        background-color: white;
+        margin: 10px;
+        padding: 10px;
+        color: black;
+        width: 300px;
+        height: 600px;
+        }
+        
+        .beuti-box {
+        background-color: #88b5e2;
+        color: black;
+        border: 2px solid black;
+        margin: 10px;
+        padding: 10px;
+        color: black;
+        width: 600px;
+        height: 700px;
+        overflow: auto;
+        }
+        .output-box {
+        background-color: #020100;
+        color: #8fbc8f;
+        border: 2px solid #000000;
+        margin: 10px;
+        padding: 10px;
+        color: #8fbc8f;
+        width: 600px;
+        height: 700px;
+        overflow: auto;
+        font-weight: bold;
+        }
+        
+        .arrow-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        margin: 10px;
+        }
+        .arrow {
+        border: 1px solid white;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        }
+        .clear-box {
+        width: 3cm;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        color: rgb(8, 2, 2);
+        height: 80px;
+        border: 2px solid black;
+        background-color: #fdf8f8;
+        margin: 10px 0;
+        }
+        .clear-box:hover {
+        background-color: #f1efef;
+        }
+        textarea {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background-color: white;
+        color: #000003;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -132,6 +132,17 @@ textarea {
                 var jsonObj = JSON.parse(inputText);
                 var prettyJson = JSON.stringify(jsonObj, null, 2);
                 document.getElementById('beutiBox').value = prettyJson;
+                if (jsonObj.fullUrl && jsonObj.fullUrl.includes("https://Bupa.com.sa/MessageHeader")) {
+                // it will Extract Bupa in the message header so we will know this is for Bupa 
+                var match = jsonObj.fullUrl.match(/https:\/\/(\w+)\.com\.sa\/MessageHeader/);
+                if (match && match[1] === "Bupa") {
+                    alert("URL contains Bupa");
+                } else {
+                    alert("Wrong response to Bupa company");
+                }
+                } else {
+                    alert("Wrong response to Bupa company");
+                }
             } catch (e) {
                 document.getElementById('beutiBox').value = 'Invalid JSON: ' + e.message;
                 document.getElementById('outputBox').innerText = '';
@@ -147,10 +158,11 @@ textarea {
             document.getElementById('outputBox').innerText = '';
         }
  
-        function searchJson(prettyJsonText) {
+    function searchJson(prettyJsonText) {
     try {
         var jsonObj = JSON.parse(prettyJsonText);
         var searchPatterns = {
+            // to extract specific informations based on thier locations
             'resourceType': '"eventCoding":\\s*{\\s*"system":\\s*"[^"]*",\\s*"code":\\s*"([^"]+)"'+"\n",
             'Bundle ID': '"Bundle"[\\s\\S]*?"id":\\s*"([^"]+)"',
             'Claim Type': '/CodeSystem/claim-type"[\\s\\S]*?"code":\\s*"([^"]+)"'+"\n",
@@ -168,7 +180,7 @@ textarea {
                     var match = prettyJsonText.match(regex);
                     var value = match && match[1];
                     if (value) {
-                        // Apply specific validation for Member ID and National or Iqama ID
+                        // Apply validation for Member ID and National or Iqama ID
                         if (key === 'Member ID' && !/^\d{8}$/.test(value)) {
                             errorMessages.push('Error: Member ID should be exactly 8 digits.');
                         } else if (key === 'National or Iqama ID' && !/^\d{10}$/.test(value)) {
@@ -186,13 +198,41 @@ textarea {
                     errorMessages.push('it is not bupa License');
                 }
 
-                // Show error messages if there are any
+                // Show error messages if there any
                 if (errorMessages.length > 0) {
                     alert(errorMessages.join('\n'));
                 }
                 
                 document.getElementById('outputBox').innerHTML = results;
                 processProductOrService(prettyJsonText, results);
+
+            } catch (e) {
+                document.getElementById('outputBox').innerText = 'Error parsing JSON: ' + e.message;
+            }
+            try {
+                var jsonObj = JSON.parse(prettyJsonText);
+                var licensePattern = /"system":\s*"http:\/\/nphies\.sa\/license\/payer-license",\s*"value":\s*"([^"]+)"/g;
+                var match;
+                var licenseCount = 0;
+                var correctLicenseCount = 0;
+                var incorrectLicenses = [];
+
+                while (match = licensePattern.exec(prettyJsonText)) {
+                    licenseCount++;
+                    if (match[1] === "7001571327") {
+                        correctLicenseCount++;
+                    } else { 
+                        incorrectLicenses.push(match[1]);
+                    }
+                }
+
+                if (incorrectLicenses.length > 0) {
+                    incorrectLicenses.forEach((license, index) => {
+                        alert("Number (" + (index + 1) + ") is not Bupa license: " + license);
+                    });
+                }
+
+                document.getElementById('outputBox').innerHTML = "Total licenses found: " + licenseCount + "<br>Correct license '456789098765' found: " + correctLicenseCount;
 
             } catch (e) {
                 document.getElementById('outputBox').innerText = 'Error parsing JSON: ' + e.message;
