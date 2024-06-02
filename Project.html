@@ -154,7 +154,7 @@
 
         var urlPattern = /"fullUrl":\s*"https:\/\/bupa.com.sa\/MessageHeader/g;
         if (!urlPattern.test(prettyJsonText)) {
-            errorMessages.push("Message is not for Bupa.");
+            errorMessages.push("Message is not for Bupa, either it's a wrong response or it's  a request ");
         }
         
         for (var key in searchPatterns) {
