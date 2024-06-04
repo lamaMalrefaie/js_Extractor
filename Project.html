@@ -1,1 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rules Library Json Extractor</title>
+
+    <style>
+ body {
+  background-image: url('back.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: white;
+  font-family: Arial, sans-serif; 
+  margin: 0;
+  padding: 0;
+}
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 100px;
+  height: calc(100vh - 100px);
+}
+.title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: bold;
+  color: white;
+}
+.boxes {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+}
+.box {
+  border: 2px solid black;
+  background-color: white;
+  margin: 10px;
+  padding: 10px;
+  color: black;
+  width: 300px;
+  height: 600px;
+}
+ 
+.beuti-box {
+  background-color: #88b5e2;
+  color: black;
+  border: 2px solid black;
+  margin: 10px;
+  padding: 10px;
+  color: black;
+  width: 600px;
+  height: 700px;
+  overflow: auto;
+}
+.output-box {
+  background-color: #020100;
+  color: #8fbc8f;
+  border: 2px solid #000000;
+  margin: 10px;
+  padding: 10px;
+  color: #8fbc8f;
+  width: 600px;
+  height: 700px;
+  overflow: auto;
+  font-weight: bold;
+}
+ 
+.arrow-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  margin: 10px;
+}
+.arrow {
+  border: 1px solid white;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+}
+.clear-box {
+  width: 3cm;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: rgb(8, 2, 2);
+  height: 80px;
+  border: 2px solid black;
+  background-color: #fdf8f8;
+  margin: 10px 0;
+}
+.clear-box:hover {
+  background-color: #f1efef;
+}
+textarea {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: white;
+  color: #000003;
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">Rules Library Json Extractor</div>
+        <div class="boxes">
+            <textarea id="inputBox" class="box" placeholder="Paste your JSON text here"></textarea>
+            <div class="arrow-box" onclick="processJson()">
+                <div class="arrow">&#8594;</div>
+            </div>
+           
+            <textarea id="beutiBox" class="beuti-box" readonly></textarea>
+            <div id="outputBox" class="output-box"></div>
+        </div>
+        <div class="clear-box" onclick="clearContent()">Clear</div>
+    </div>
+    <script>
+function processJson() {
+    var inputText = document.getElementById('inputBox').value;
+    try {
+        var jsonObj = JSON.parse(inputText);
+        var prettyJson = JSON.stringify(jsonObj, null, 2);
+        document.getElementById('beutiBox').value = prettyJson;
+        searchJson(prettyJson);
+    } catch (e) {
+        document.getElementById('beutiBox').value = 'Invalid JSON: ' + e.message;
+        document.getElementById('outputBox').innerText = 'Error parsing JSON: ' + e.message;
+        return;
+    }
+}
+
+function searchJson(prettyJsonText) {
+    var message = '';
+    try {
+        var jsonObj = JSON.parse(prettyJsonText);
+        var urlPattern = '"fullUrl":\\s*"https?://([^/]+)';
+        var urlMatch = prettyJsonText.match(new RegExp(urlPattern, 'i'));
+        if (urlMatch) {
+            var domainParts = urlMatch[1].split('.');
+            var companyIdentifier = domainParts[0].toUpperCase(); // Assuming the identifier is always the first subdomain
+            if (companyIdentifier !== "IUA") {
+                message = "Wrong response to IUA company";
+                alert(message);
+            } else {
+                message = 'Company identifier valid: ' + companyIdentifier;
+            }
+        } else {
+            message = "No URL found in the provided JSON";
+            alert(message);
+        }
+    } catch (e) {
+        message = 'Error parsing JSON: ' + e.message;
+    }
+    
+    document.getElementById('outputBox').innerText = message;
+    // Continue processing the JSON for products or services
+    processProductOrService(prettyJsonText, document.getElementById('outputBox').innerHTML);
+}
+
+function processProductOrService(prettyJsonText, previousResults) {
+    var servicePattern = '"productOrService":\\s*{[\\s\\S]+?},[\\s\\S]*?"quantity":\\s*{\\s*"value":\\s*(\\d+)';
+    var serviceResults = '';
+    var serviceMatches = prettyJsonText.match(new RegExp(servicePattern, 'gi'));
+
+    if (serviceMatches) {
+        for (var i = 0; i < serviceMatches.length; i++) {
+            var currentMatch = serviceMatches[i];
+            var displayPattern = '"display":\\s*"([^"]+)"';
+            var NphiesPattern = '"coding":\\s*\\[\\s*{[\\s\\S]+?"system":\\s*"([^"]+)",\\s*"code":\\s*"([^"]+)"';
+            var ServicePattern = '"coding":\\s*\\[\\s*{[\\s\\S]+?},\\s*{[\\s\\S]+?"system":\\s*"([^"]+)",\\s*"code":\\s*"([^"]+)"';
+            var displayMatch = currentMatch.match(new RegExp(displayPattern, 'i'));
+            var NphiesMatch = currentMatch.match(new RegExp(NphiesPattern, 'i'));
+            var ServiceMatch = currentMatch.match(new RegExp(ServicePattern, 'i'));
+            var quantityMatch = currentMatch.match(new RegExp('"quantity":\\s*{\\s*"value":\\s*(\\d+)', 'i'));
+
+            serviceResults += 'Product/Service ' + (i + 1) + ': <br>';
+            serviceResults += 'Name: ' + (displayMatch ? displayMatch[1] : 'Not found') + '<br>';
+            serviceResults += 'Nphies Code: ' + (NphiesMatch ? NphiesMatch[2] : 'Not found') + '<br>';
+            serviceResults += 'Service Code: ' + (ServiceMatch ? ServiceMatch[2] : 'Not found') + '<br>';
+            serviceResults += 'Quantity: ' + (quantityMatch ? quantityMatch[1] : 'Not found') + '<br><br>';
+        }
+    }
+
+    document.getElementById('outputBox').innerHTML = previousResults + serviceResults;
+}
+
+        function clearContent() {
+            document.getElementById('inputBox').value = '';
+            document.getElementById('beutiBox').value = '';
+            document.getElementById('outputBox').innerText = '';
+        }
+ 
+        function searchJson(prettyJsonText) {
+    try {
+        var jsonObj = JSON.parse(prettyJsonText);
+        var searchPatterns = {
+            'resourceType': '"eventCoding":\\s*{\\s*"system":\\s*"[^"]*",\\s*"code":\\s*"([^"]+)"'+"\n",
+            'Bundle ID': '"Bundle"[\\s\\S]*?"id":\\s*"([^"]+)"',
+            'Claim Type': '/CodeSystem/claim-type"[\\s\\S]*?"code":\\s*"([^"]+)"'+"\n",
+            'Claim Sub-type': '/CodeSystem/claim-subtype"[\\s\\S]*?"code":\\s*"([^"]+)"'+"\n",
+            'Member ID': '/memberid"[\\s\\S]*?"value":\\s*"([^"]+)"'+"\n",
+            'National or Iqama ID': '(?:nphies\\.sa/identifier/nationalid|sa/identifier/iqama)"[\\s\\S]*?"value":\\s*"([\\d]+)"'+"\n",
+            'Organization ID': '.sa/license/provider-license"[\\s\\S]*?"value":\\s*"([^"]+)"'+"\n",
+            'Gender': '"gender":\\s*"([^"]+)"'
+        };
+        
+        var results = '';
+                var errorMessages = [];
+                for (var key in searchPatterns) {
+                    var regex = new RegExp(searchPatterns[key], 'i');
+                    var match = prettyJsonText.match(regex);
+                    var value = match && match[1];
+                    if (value) {
+                        // Apply specific validation for Member ID and National or Iqama ID
+                        if (key === 'Member ID' && !/^\d{8}$/.test(value)) {
+                            errorMessages.push('Error: Member ID should be exactly 8 digits.');
+                        } else if (key === 'National or Iqama ID' && !/^\d{10}$/.test(value)) {
+                            errorMessages.push('Error: National or Iqama ID should be exactly 10 digits.');
+                        } else {
+                            results += key + ': ' + copyButton(value) + '<br>';
+                        }
+                    } else {
+                        results += key + ': Not found<br>';
+                    }
+                }
+                var licensePattern = '"system":\\s*"http://nphies.sa/license/payer-license",\\s*"value":\\s*"([^"]+)"';
+                var licenseMatch = prettyJsonText.match(new RegExp(licensePattern, 'i'));
+                if (licenseMatch && licenseMatch[1] !== '7001571327') {
+                    errorMessages.push('it is not bupa License');
+                }
+
+                // Show error messages if there are any
+                if (errorMessages.length > 0) {
+                    alert(errorMessages.join('\n'));
+                }
+                
+                document.getElementById('outputBox').innerHTML = results;
+                processProductOrService(prettyJsonText, results);
+
+            } catch (e) {
+                document.getElementById('outputBox').innerText = 'Error parsing JSON: ' + e.message;
+            }
+        var optionalPatterns = {
+            'Outcome': '"outcome":\\s*"([^"]+)"',
+            'Disposition': '"disposition":\\s*"([^"]+)"'
+        };
+        
+        var results = '';
+        
+        for (var key in searchPatterns) {
+                var regex = new RegExp(searchPatterns[key], 'i');
+                var match = prettyJsonText.match(regex);
+                if (match) {
+                    var valid = true; 
+                    var message = '';
+                    if (key === 'Member ID') {
+                        if (match[1].length !== 8) {
+                            valid = false;
+                            message = 'Member ID should be exactly 8 digits.';
+                        }
+                    } else if (key === 'National or Iqama ID') {
+                        if (match[1].length !== 10) { // Check if National or Iqama ID is not 10 digits
+                            valid = false;
+                            message = 'National or Iqama ID should be exactly 10 digits.';
+                        }
+                    }
+
+                    if (valid) {
+                        results += key + ': ' + copyButton(match[1]) + '<br>';
+                    } else {
+                        results += key + ': ' + message + '<br>';
+                    }
+                } else {
+                    results += key + ': Not found<br>';
+                }
+        }
+//
+        
+        for (var key in optionalPatterns) {
+            var regex = new RegExp(optionalPatterns[key], 'i');
+            var match = prettyJsonText.match(regex);
+            if (match) { 
+                results += key + ': ' + match[1] + '<br>';
+            }
+        }
+        
+        processProductOrService(prettyJsonText, results);
+    } 
+
+
+function copyButton(text) {
+    return '<span style="cursor: pointer; text-decoration: underline;" onclick="copyToClipboard(\'' + text + '\')">' + text + '</span>';
+}
+
+function copyToClipboard(text) {
+    var dummy = document.createElement("textarea");
+    document.body.appendChild(dummy);
+    dummy.value = text;
+    dummy.select();
+    document.execCommand("copy");
+    document.body.removeChild(dummy);
+    alert('Copied: ' + text); 
+}
+
+</script>
+</body>
+</html>
 
