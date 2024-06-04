@@ -149,8 +149,8 @@ function searchJson(prettyJsonText) {
         if (urlMatch) {
             var domainParts = urlMatch[1].split('.');
             var companyIdentifier = domainParts[0].toUpperCase(); // Assuming the identifier is always the first subdomain
-            if (companyIdentifier !== "IUA") {
-                message = "Wrong response to IUA company";
+            if (companyIdentifier !== "Bupa") {
+                message = "Wrong response to Bupa company";
                 alert(message);
             } else {
                 message = 'Company identifier valid: ' + companyIdentifier;
