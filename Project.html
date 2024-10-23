@@ -121,16 +121,19 @@
         <div class="title">Rules Library Json Extractor</div>
         <div class="boxes">
             <textarea id="inputBox" class="box" placeholder="Paste your JSON text here"></textarea>
-            <div class="arrow-box" onclick="processJson()">
+            <div class="arrow-box">
                 <div class="arrow">&#8594;</div>
             </div>
             <textarea id="beutiBox" class="beuti-box" readonly></textarea>
             <div id="outputBox" class="output-box"></div>
         </div>
-        <div class="clear-box" onclick="clearContent()">Clear</div>
+        <div class="clear-box">Clear</div>
     </div>
 
     <script>
+        document.querySelector('.arrow-box').addEventListener('click', processJson);
+        document.querySelector('.clear-box').addEventListener('click', clearContent);
+
         function processJson() {
             var inputText = document.getElementById('inputBox').value;
             try {
@@ -184,17 +187,6 @@
                     var regex = new RegExp(searchPatterns[key], 'i');
                     var match = prettyJsonText.match(regex);
                     var value = match && match[1];
-                    // if (value) {
-                    //     if (key === 'National or Iqama ID' && !/^\d{10}$/.test(value)) {
-                    //         errorMessages.push('Error: National or Iqama ID should be exactly 10 digits.');
-                    //     } else if (key === 'Member ID' && !/^\d{8}$/.test(value)) {
-                    //         errorMessages.push('Error: Member ID should be exactly 8 digits.');
-                    //     } else {
-                    //         results += key + ': ' + copyButton(value) + '<br>';
-                    //     }
-                    // } else {
-                    //     results += key + ': Not found<br>';
-                    // }
                 }
 
                 if (errorMessages.length > 0) {
@@ -206,12 +198,10 @@
             } catch (e) {
                 document.getElementById('outputBox').innerText = 'Error parsing JSON: ' + e.message;
             }
-
-            processProductOrService(prettyJsonText, results);
         }
 
         function processProductOrService(prettyJsonText, previousResults) {
-            var servicePattern = '"productOrService":\\s*{[\\s\\S]+?},[\\s\\S]*?"quantity":\\s*{\\s*"value":\\s*(\\d+)'';
+            var servicePattern = '"productOrService":\\s*{[\\s\\S]+?},[\\s\\S]*?"quantity":\\s*{\\s*"value":\\s*(\\d+)"';
 
             var serviceResults = '';
             var serviceMatches = prettyJsonText.match(new RegExp(servicePattern, 'gi'));
