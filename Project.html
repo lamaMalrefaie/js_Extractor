@@ -158,8 +158,7 @@
                     'Member ID': '/memberid"[\\s\\S]*?"value":\\s*"([^"]+)"',
                     'National or Iqama ID': '(?:nphies\\.sa/identifier/nationalid|sa/identifier/iqama)"[\\s\\S]*?"value":\\s*"([\\d]+)"',
                     'Organization ID': '.sa/license/provider-license"[\\s\\S]*?"value":\\s*"([^"]+)"',
-                    'Gender': '"gender":\\s*"([^"]+)"',
-                    'Serviced Date': '"servicedDate":\\s*"([^"]+)"'
+                    'Gender': '"gender":\\s*"([^"]+)"'
                 };
 
                 var results = '';
@@ -204,15 +203,18 @@
                     var displayPattern = '"display":\\s*"([^"]+)"';
                     var NphiesPattern = '"coding":\\s*\\[\\s*{[\\s\\S]+?"system":\\s*"([^"]+)",\\s*"code":\\s*"([^"]+)"';
                     var ServicePattern = '"coding":\\s*\\[\\s*{[\\s\\S]+?},\\s*{[\\s\\S]+?"system":\\s*"([^"]+)",\\s*"code":\\s*"([^"]+)"';
+                    var servicedDatePattern = '"servicedDate":\\s*"([^"]+)"';
                     var displayMatch = currentMatch.match(new RegExp(displayPattern, 'i'));
                     var NphiesMatch = currentMatch.match(new RegExp(NphiesPattern, 'i'));
                     var ServiceMatch = currentMatch.match(new RegExp(ServicePattern, 'i'));
+                    var servicedDateMatch = currentMatch.match(new RegExp(servicedDatePattern, 'i'));
                     var quantityMatch = currentMatch.match(new RegExp('"quantity":\\s*{\\s*"value":\\s*(\\d+)', 'i'));
 
                     serviceResults += 'Product/Service ' + (i + 1) + ': <br>';
                     serviceResults += 'Name: ' + (displayMatch ? displayMatch[1] : 'Not found') + '<br>';
                     serviceResults += 'Nphies Code: ' + (NphiesMatch ? copyButton(NphiesMatch[2]) : 'Not found') + '<br>';
                     serviceResults += 'Service Code: ' + (ServiceMatch ? copyButton(ServiceMatch[2]) : 'Not found') + '<br>';
+                    serviceResults += 'Serviced Date: ' + (servicedDateMatch ? servicedDateMatch[1] : 'Not found') + '<br>';
                     serviceResults += 'Quantity: ' + (quantityMatch ? quantityMatch[1] : 'Not found') + '<br><br>';
                 }
             }
