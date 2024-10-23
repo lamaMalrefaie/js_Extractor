@@ -173,10 +173,82 @@
                     var regex = new RegExp(searchPatterns[key], 'i');
                     var match = prettyJsonText.match(regex);
                     var value = match && match[1];
+                    // if (value) {
+                    //     if (key === 'National or Iqama ID' && !/^\d{10}$/.test(value)) {
+                    //         errorMessages.push('Error: National or Iqama ID should be exactly 10 digits.');
+                    //     } else if (key === 'Member ID' && !/^\d{8}$/.test(value)) {
+                    //         errorMessages.push('Error: Member ID should be exactly 8 digits.');
+                    //     } else {
+                    //         results += key + ': ' + copyButton(value) + '<br>';
+                    //     }
+                    // } else {
+                    //     results += key + ': Not found<br>';
+                    // }
+                }
+
+                if (errorMessages.length > 0) {
+                    alert(errorMessages.join('\n'));
+                }
+
+                document.getElementById('outputBox').innerHTML = results;
+                processProductOrService(prettyJsonText, results);
+            } catch (e) {
+                document.getElementById('outputBox').innerText = 'Error parsing JSON: ' + e.message;
+            }
+
+            try {
+                var jsonObj = JSON.parse(prettyJsonText);
+                var licensePattern = /"system":\s*"http:\/\/nphies\.sa\/license\/payer-license",\s*"value":\s*"([^"]+)"/g;
+                var match;
+                var licenseCount = 0;
+                var correctLicenseCount = 0;
+                var incorrectLicenses = [];
+
+                while (match = licensePattern.exec(prettyJsonText)) {
+                    licenseCount++;
+                    if (match[1] === "7001571327") {
+                        correctLicenseCount++;
+                    } else {
+                        incorrectLicenses.push(match[1]);
+                    }
+                }
+
+                if (incorrectLicenses.length > 0) {
+                    incorrectLicenses.forEach((license, index) => {
+                        alert("Number (" + (index + 1) + ") is not Bupa license: " + license);
+                    });
+                }
+
+                document.getElementById('outputBox').innerHTML = "Total licenses found: " + licenseCount + "<br>Correct license '456789098765' found: " + correctLicenseCount;
+                var optionalPatterns = {
+                    'Outcome': '"outcome":\\s*"([^"]+)"',
+                    'Disposition': '"disposition":\\s*"([^"]+)"'
+                };
+
+                var results = '';
+                var errorMessages = [];
+                for (var key in searchPatterns) {
+                    var regex = new RegExp(searchPatterns[key], 'i');
+                    var match = prettyJsonText.match(regex);
+                    var value = match && match[1];
                     if (value) {
-                        results += key + ': ' + copyButton(value) + '<br>';
+                        if (key === 'National or Iqama ID' && !/^\d{10}$/.test(value)) {
+                            errorMessages.push('Error: National or Iqama ID should be exactly 10 digits.');
+                        } else if (key === 'Member ID' && !/^\d{8}$/.test(value)) {
+                            errorMessages.push('Error: Member ID should be exactly 8 digits.');
+                        } else {
+                            results += key + ': ' + copyButton(value) + '<br>';
+                        }
                     } else {
                         results += key + ': Not found<br>';
+                    }
+                }
+
+                for (var key in optionalPatterns) {
+                    var regex = new RegExp(optionalPatterns[key], 'i');
+                    var match = prettyJsonText.match(regex);
+                    if (match) {
+                        results += key + ': ' + match[1] + '<br>';
                     }
                 }
 
@@ -189,6 +261,8 @@
             } catch (e) {
                 document.getElementById('outputBox').innerText = 'Error parsing JSON: ' + e.message;
             }
+
+            processProductOrService(prettyJsonText, results);
         }
 
         function processProductOrService(prettyJsonText, previousResults) {
@@ -210,13 +284,12 @@
                     var servicedDateMatch = currentMatch.match(new RegExp(servicedDatePattern, 'i'));
                     var quantityMatch = currentMatch.match(new RegExp('"quantity":\\s*{\\s*"value":\\s*(\\d+)', 'i'));
 
-                    serviceResults += '{<br>';
-                    serviceResults += '"display": ' + (displayMatch ? displayMatch[1] : 'Not found') + '<br>';
-                    serviceResults += '"Nphies Code": ' + (NphiesMatch ? copyButton(NphiesMatch[2]) : 'Not found') + '<br>';
-                    serviceResults += '"Service Code": ' + (ServiceMatch ? copyButton(ServiceMatch[2]) : 'Not found') + '<br>';
-                    serviceResults += '"Serviced Date": ' + (servicedDateMatch ? servicedDateMatch[1] : 'Not found') + '<br>';
-                    serviceResults += '"Quantity": ' + (quantityMatch ? quantityMatch[1] : 'Not found') + '<br>';
-                    serviceResults += '},<br><br>';
+                    serviceResults += 'Product/Service ' + (i + 1) + ': <br>';
+                    serviceResults += 'Name: ' + (displayMatch ? displayMatch[1] : 'Not found') + '<br>';
+                    serviceResults += 'Nphies Code: ' + (NphiesMatch ? copyButton(NphiesMatch[2]) : 'Not found') + '<br>';
+                    serviceResults += 'Service Code: ' + (ServiceMatch ? copyButton(ServiceMatch[2]) : 'Not found') + '<br>';
+                    serviceResults += 'Serviced Date: ' + (servicedDateMatch ? servicedDateMatch[1] : 'Not found') + '<br>';
+                    serviceResults += 'Quantity: ' + (quantityMatch ? quantityMatch[1] : 'Not found') + '<br><br>';
                 }
             }
 
