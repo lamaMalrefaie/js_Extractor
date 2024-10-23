@@ -184,17 +184,17 @@
                     var regex = new RegExp(searchPatterns[key], 'i');
                     var match = prettyJsonText.match(regex);
                     var value = match && match[1];
-                    // if (value) {
-                    //     if (key === 'National or Iqama ID' && !/^\d{10}$/.test(value)) {
-                    //         errorMessages.push('Error: National or Iqama ID should be exactly 10 digits.');
-                    //     } else if (key === 'Member ID' && !/^\d{8}$/.test(value)) {
-                    //         errorMessages.push('Error: Member ID should be exactly 8 digits.');
-                    //     } else {
-                    //         results += key + ': ' + copyButton(value) + '<br>';
-                    //     }
-                    // } else {
-                    //     results += key + ': Not found<br>';
-                    // }
+                    if (value) {
+                         if (key === 'National or Iqama ID' && !/^\d{10}$/.test(value)) {
+                             errorMessages.push('Error: National or Iqama ID should be exactly 10 digits.');
+                        } else if (key === 'Member ID' && !/^\d{8}$/.test(value)) {
+                            errorMessages.push('Error: Member ID should be exactly 8 digits.');
+                         } else {
+                             results += key + ': ' + copyButton(value) + '<br>';
+                         }
+                    } else {
+                         results += key + ': Not found<br>';
+                    }
                 }
 
                 if (errorMessages.length > 0) {
@@ -233,7 +233,7 @@
                     serviceResults += 'Name: ' + (displayMatch ? displayMatch[1] : 'Not found') + '<br>';
                     serviceResults += 'Nphies Code: ' + (NphiesMatch ? copyButton(NphiesMatch[2]) : 'Not found') + '<br>';
                     serviceResults += 'Service Code: ' + (ServiceMatch ? copyButton(ServiceMatch[2]) : 'Not found') + '<br>';
-                    serviceResults += 'Serviced Date: ' + (servicedDateMatch ? servicedDateMatch[1] : 'Not found') + '<br>';
+                    serviceResults += 'Serviced Date: ' + (servicedDateMatch ?  copyButton(servicedDateMatch[1]) : 'Not found') + '<br>';
                     serviceResults += 'Quantity: ' + (quantityMatch ? quantityMatch[1] : 'Not found') + '<br><br>';
                 }
             }
