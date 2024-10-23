@@ -210,12 +210,13 @@
                     var servicedDateMatch = currentMatch.match(new RegExp(servicedDatePattern, 'i'));
                     var quantityMatch = currentMatch.match(new RegExp('"quantity":\\s*{\\s*"value":\\s*(\\d+)', 'i'));
 
-                    serviceResults += 'Product/Service ' + (i + 1) + ': <br>';
-                    serviceResults += 'Name: ' + (displayMatch ? displayMatch[1] : 'Not found') + '<br>';
-                    serviceResults += 'Nphies Code: ' + (NphiesMatch ? copyButton(NphiesMatch[2]) : 'Not found') + '<br>';
-                    serviceResults += 'Service Code: ' + (ServiceMatch ? copyButton(ServiceMatch[2]) : 'Not found') + '<br>';
-                    serviceResults += 'Serviced Date: ' + (servicedDateMatch ? servicedDateMatch[1] : 'Not found') + '<br>';
-                    serviceResults += 'Quantity: ' + (quantityMatch ? quantityMatch[1] : 'Not found') + '<br><br>';
+                    serviceResults += '{<br>';
+                    serviceResults += '"display": ' + (displayMatch ? displayMatch[1] : 'Not found') + '<br>';
+                    serviceResults += '"Nphies Code": ' + (NphiesMatch ? copyButton(NphiesMatch[2]) : 'Not found') + '<br>';
+                    serviceResults += '"Service Code": ' + (ServiceMatch ? copyButton(ServiceMatch[2]) : 'Not found') + '<br>';
+                    serviceResults += '"Serviced Date": ' + (servicedDateMatch ? servicedDateMatch[1] : 'Not found') + '<br>';
+                    serviceResults += '"Quantity": ' + (quantityMatch ? quantityMatch[1] : 'Not found') + '<br>';
+                    serviceResults += '},<br><br>';
                 }
             }
 
