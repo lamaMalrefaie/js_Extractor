@@ -278,6 +278,7 @@
                     var displayPattern = '"display":\\s*"([^"]+)"';
                     var NphiesPattern = '"coding":\\s*\\[\\s*{[\\s\\S]+?"system":\\s*"([^"]+)",\\s*"code":\\s*"([^"]+)"';
                     var ServicePattern = '"coding":\\s*\\[\\s*{[\\s\\S]+?},\\s*{[\\s\\S]+?"system":\\s*"([^"]+)",\\s*"code":\\s*"([^"]+)"';
+                    var servicedDatePattern = '"servicedDate":\\s*"([^"]+)"';
                     var displayMatch = currentMatch.match(new RegExp(displayPattern, 'i'));
                     var NphiesMatch = currentMatch.match(new RegExp(NphiesPattern, 'i'));
                     var ServiceMatch = currentMatch.match(new RegExp(ServicePattern, 'i'));
